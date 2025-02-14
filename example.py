@@ -1,37 +1,68 @@
 """
-Example usage of document text extractors.
+Example usage of the Text Gremlin document extraction library.
 """
 
-from document_extractor import PDFExtractor, PPTXExtractor
+from pathlib import Path
+from document_extractor import extract_text
 
 
-def extract_pdf_example(pdf_path):
-    """Example of PDF text extraction."""
-    try:
-        text = PDFExtractor.extract_text(pdf_path)
-        print("=== PDF Text ===")
-        print(text)
-    except Exception as e:
-        print(f"Error extracting PDF text: {e}")
+def stream_example():
+    """Example of streaming output mode."""
+    print("\nStreaming Output Example:")
+    print("-" * 50)
+    
+    # Process documents in streaming mode
+    results = extract_text(
+        "sample_docs",
+        recursive=True,
+        file_types=["pdf", "pptx"]
+    )
+    
+    if results:
+        for result in results:
+            # Print metadata
+            print("\nMetadata:")
+            print(f"Timestamp: {result['metadata']['timestamp']}")
+            print(f"Version: {result['metadata']['version']}")
+            print(f"File Types: {result['metadata']['file_types_processed']}")
+            
+            # Print document info
+            for doc in result['documents']:
+                print(f"\nDocument: {doc['file_name']}")
+                print(f"Type: {doc['file_type']}")
+                print(f"Created: {doc['date_created']}")
+                print(f"Modified: {doc['date_modified']}")
+                if doc['error']:
+                    print(f"Error: {doc['error']}")
+                else:
+                    # Print first 200 chars of content with ellipsis
+                    content_preview = doc['content'][:200] + "..."
+                    print(f"Content Preview: {content_preview}")
 
 
-def extract_pptx_example(pptx_path):
-    """Example of PowerPoint text extraction."""
-    try:
-        text = PPTXExtractor.extract_text(pptx_path)
-        print("=== PowerPoint Text ===")
-        print(text)
-    except Exception as e:
-        print(f"Error extracting PowerPoint text: {e}")
+def file_output_example():
+    """Example of file output mode."""
+    print("\nFile Output Example:")
+    print("-" * 50)
+    
+    output_file = Path("output") / "extraction_results.json"
+    
+    # Process documents and write to file
+    extract_text(
+        "sample_docs",
+        output_path=str(output_file),
+        output_mode="file",
+        recursive=True,
+        batch_size=2  # Process 2 documents per batch
+    )
+    
+    print(f"Results written to: {output_file}")
 
 
 if __name__ == "__main__":
-    # Example usage
-    pdf_file = "path/to/your/document.pdf"
-    pptx_file = "path/to/your/presentation.pptx"
+    # Create output directory if it doesn't exist
+    Path("output").mkdir(exist_ok=True)
     
-    print("Document Text Extractor Example\n")
-    
-    extract_pdf_example(pdf_file)
-    print("\n" + "="*50 + "\n")
-    extract_pptx_example(pptx_file)
+    # Run examples
+    stream_example()
+    file_output_example()

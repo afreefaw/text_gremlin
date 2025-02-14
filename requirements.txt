@@ -1,2 +1,6 @@
 PyMuPDF>=1.23.8
 python-pptx>=0.6.21
+python-docx>=0.8.11
+pytest>=7.4.0
+pytest-cov>=4.1.0
+coverage>=7.3.0

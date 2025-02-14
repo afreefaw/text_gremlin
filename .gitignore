@@ -58,3 +58,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+
+# Project specific
+output/
+sample_docs/
