@@ -76,13 +76,12 @@ class DocumentProcessor:
             if not extractor:
                 raise ValueError(f"No extractor available for file type: {file_type}")
             
-            content = extractor.extract(path)
-            error = None
+            result = extractor.extract(path)
+            if result.error:
+                return result
+            return DocumentResult.from_path(path, result.content)
         except Exception as e:
-            content = ""
-            error = str(e)
-        
-        return DocumentResult.from_path(path, content, error)
+            return DocumentResult.from_path(path, "", str(e))
     
     def process_documents(
         self,
