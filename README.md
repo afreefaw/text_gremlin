@@ -40,9 +40,34 @@ python gui.py
 - Real-time progress tracking
 - Cancellable operations
 
-![Text Gremlin GUI](docs/gui.png)
-
 ## API Usage
+
+### Output Format
+
+Each extraction result is a JSON object with the following structure:
+
+```json
+{
+  "file_path": "path/to/document.pdf",      // Full path to the processed file
+  "file_name": "document.pdf",              // Name of the file
+  "file_type": "pdf",                       // Type of document (pdf, docx, pptx)
+  "date_created": "2025-02-13T23:05:08.350199",    // File creation timestamp
+  "date_modified": "2025-02-07T00:54:09.536225",   // File modification timestamp
+  "extraction_time": "2025-02-14T00:50:49.808537", // When the text was extracted
+  "content": {
+    // Same metadata fields as above
+    "file_path": "path/to/document.pdf",
+    "file_name": "document.pdf",
+    "file_type": "pdf",
+    "date_created": "2025-02-13T23:05:08.350199",
+    "date_modified": "2025-02-07T00:54:09.536225",
+    "extraction_time": "2025-02-14T00:50:49.808537",
+    "content": "Extracted text content from the document...",
+    "error": null  // Error message if extraction failed, null otherwise
+  },
+  "error": null    // Error message if extraction failed, null otherwise
+}
+```
 
 ### Basic Text Extraction
 
@@ -51,12 +76,18 @@ from document_extractor import extract_text
 
 # Extract text from a single file (streams results)
 for result in extract_text("path/to/document.pdf"):
-    print(result['content'])
+    if not result['error']:
+        print(f"File: {result['file_name']}")
+        print(f"Created: {result['date_created']}")
+        print(f"Content: {result['content']['content']}")
 
 # Extract text from a directory (recursive by default)
 for result in extract_text("path/to/documents/"):
-    print(f"File: {result['file_name']}")
-    print(f"Content: {result['content']}")
+    if not result['error']:
+        print(f"File: {result['file_name']}")
+        print(f"Type: {result['file_type']}")
+        print(f"Modified: {result['date_modified']}")
+        print(f"Content: {result['content']['content']}")
 ```
 
 ### Output Modes
@@ -67,7 +98,8 @@ The library supports two output modes:
 ```python
 # Stream results
 for result in extract_text("path/to/documents/", output_mode="stream"):
-    print(result['content'])
+    if not result['error'] and not result['content']['error']:
+        print(f"Content: {result['content']['content']}")
 ```
 
 2. File mode - writes all results to a JSON file:
